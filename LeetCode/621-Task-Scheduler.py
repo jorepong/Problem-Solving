@@ -7,28 +7,20 @@ class Solution:
         heap = []
 
         for task in set(tasks):
-            heapq.heappush(heap, [0, -task_map[task], task])
+            heapq.heappush(heap, -task_map[task])
 
-        result = []
+        queue = deque()
         clock = 0
-        while heap:
-            if heap[0][0] < clock:
-                item = heapq.heappop(heap)
-                task = item[2]
-                heapq.heappush(heap, [clock, -task_map[task], task])
-                continue
-            elif heap[0][0] == clock:
-                item = heapq.heappop(heap)
-                task = item[2]
-
-                result.append(task)
-                task_map[task] -= 1
-
-                if task_map[task] > 0:
-                    heapq.heappush(heap, [clock + n + 1, -task_map[task], task])
-            else:
-                result.append('idle')
+        while heap or queue:
             clock += 1
+            
+            if heap:
+                item = heapq.heappop(heap)
+                if item + 1 != 0:
+                    queue.append((item+1, clock+n))
+            
+            if queue and queue[0][1] == clock:
+                item = queue.popleft()
+                heapq.heappush(heap, item[0])
         
-        print(result)
-        return len(result)
+        return clock
